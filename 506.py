@@ -75,8 +75,6 @@ mu0 = 189274
 
 none_have_it_lt, all_have_it_gte = ns_categorized(mu0)
 
-print none_have_it_lt, all_have_it_gte
-
 for n in xrange(1, none_have_it_lt):
 	assert mu(n) < mu0
 
@@ -84,13 +82,19 @@ for n in xrange(all_have_it_gte, all_have_it_gte + 500):
 	assert mu(n) >= mu0
 
 def sum_up_to(nmax):
+	assert nmax % 15 == 0
 	for k in count(1):
+		sum_of_this_k = 0
 		none_have_it_lt, all_have_it_gte = ns_categorized(k)
-		if nmax >= all_have_it_gte:
-			batches_left = (nmax - all_have_it_gte + 1) / 15
-			sum_of_this_k = batches_left * slds[k % 6]
-			print k, sum_of_this_k
-		else:
+		batches_left = (nmax - all_have_it_gte + 1) / 15
+		if batches_left >= 0:
+			sum_of_this_k += batches_left * slds[k % 6]
+		for n in xrange(none_have_it_lt, all_have_it_gte):
+			if mu(n) >= k:
+				while mu(n-15) >= k:
+					n = n - 15
+				sum_of_this_k += int(str(nu(n))[-k])
+		if sum_of_this_k == 0:
 			break
 
 sum_up_to(3 * 15)
