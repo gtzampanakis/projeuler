@@ -100,19 +100,22 @@ def sum_up_to(nmax):
 		batches_left = (nmax - all_have_it_gte + 1) / 15
 		if batches_left >= 0:
 			sum_of_this_k += batches_left * slds[(k-1) % 6]
-		for n in xrange(none_have_it_lt, all_have_it_gte):
-			if n > nmax:
-				break
-			if mu(n) >= k:
-				while mu(n-15) >= k:
-					n = n - 15
-				sum_of_this_k += int(str(nu(n))[-k])
+		def loop2(sum_of_this_k_in):
+			for n in xrange(none_have_it_lt, all_have_it_gte):
+				if n > nmax:
+					break
+				if mu(n) >= k:
+					while mu(n-15) >= k:
+						n = n - 15
+					sum_of_this_k_in += int(str(nu(n))[-k])
+			return sum_of_this_k_in
+		sum_of_this_k = loop2(sum_of_this_k)
 		if sum_of_this_k == 0:
 			break
 		ss.append(sum_of_this_k)
 	return ss
 
-nmax = 200 * 15
+nmax = 10 * 15
 
 # for n in xrange(1, nmax+1):
 # 	print n, nu(n)
@@ -124,7 +127,24 @@ nmax = 200 * 15
 ss = sum_up_to(nmax)
 
 # print ss
-print sum((10**si * s) for si,s in enumerate(ss))
+# print sum((10**si * s) for si,s in enumerate(ss))
 # print S(nmax)
+# 
+# for n in xrange(1, 4 * 15 + 1):
+# 	print '{n:>10d}   {nun:>30d}'.format(n = n, nun = nu(n))
+# 	if n % 15 == 0:
+# 		print
 
+
+M = 4232097
+m = 260517
+
+b = 66
+
+s = 0
+for i in xrange(1, b+1):
+	s += ( M * (b-i) + m ) * 10**((i-1)*6)
+
+print s
+print S(b*15)
 
