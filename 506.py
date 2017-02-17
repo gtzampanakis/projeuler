@@ -1,4 +1,5 @@
 import sys
+import pmemoize
 
 from itertools import *
 
@@ -106,15 +107,15 @@ def sum_up_to(nmax):
 		ss.append(sum_of_this_k)
 	return ss
 
-# for n in xrange(1, 10 * 15 + 1):
-# 	print '{n:>10d}   {nun:>100d}'.format(n = n, nun = nu(n))
-# 	if n % 15 == 0:
-# 		print
+for n in xrange(1, 6 * 15 + 1):
+	print '{n:>10d}   {nun:>100d}'.format(n = n, nun = nu(n))
+	if n % 15 == 0:
+		print
 
 M = 4232097
 m = 260517
 
-b = 2 ** 5
+b = 2 ** 18
 
 def Sb(b):
 	s = 0
@@ -133,21 +134,37 @@ def Sb2(b):
 		M * sum(10**(6*(i-1)) for i in xrange(1, b))
 	)
 
-print Sb(b)
-print Sb2(b)
-print S(b*15)
+# r1 = Sb(b)
+# r2 = Sb2(b)
+# print S(b*15)
 
-def Sb3(N):
-	""" Powers of 2. """
-	print N
+@pmemoize.MemoizedFunction
+def CC(N):
 	if N == 1:
-		return Sb(1)
-	HN = N/2
-	A  = Sb3(HN)
-	low = A
-	high = A * 10**(6 * HN) + M * HN
-	result = (low + high)
+		result = M
+	else:
+		HN = N/2
+		A = CC(HN)
+		result = 2*A + 2*A * 10**(6 * HN)
 	return result
 
-print Sb3(b)
+@pmemoize.MemoizedFunction
+def Sb3(N):
+	""" Powers of 2. """
+	if N == 1:
+		result = Sb(1)
+	else:
+		HN = N/2
+		A  = Sb3(HN)
+		low = A
+		high = A * 10**(6 * HN) + CC(HN)
+		result = (low + high)
+	return result
+
+r3 = Sb3(b)
+
+# assert r1 == r2
+# assert r2 == r3
+
+print r3 % MOD
 
