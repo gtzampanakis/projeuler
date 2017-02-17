@@ -1,5 +1,4 @@
 import sys
-import pmemoize
 
 from itertools import *
 
@@ -138,7 +137,6 @@ print Sb(b)
 print Sb2(b)
 print S(b*15)
 
-@pmemoize.MemoizedFunction
 def Sb3(N):
 	""" Powers of 2. """
 	print N
