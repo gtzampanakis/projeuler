@@ -1,10 +1,12 @@
 import sys
-sys.setrecursionlimit(10**6)
+import pmemoize
 
 from itertools import *
 
 phi = [0,1,2,3,4,0,3,5,3,0,4,3,2,1,0]
 psi = [1,1,1,1,2,3,2,4,3,4,5,5,5,5,6]
+
+MOD = 123454321
 
 def a(n):
 	return phi[(n-1)%15]
@@ -81,16 +83,6 @@ for i in reversed(xrange(6)):
 		tot += int(ld[i])
 	slds.append(tot)
 
-mu0 = 189274
-
-none_have_it_lt, all_have_it_gte = ns_categorized(mu0)
-
-for n in xrange(1, none_have_it_lt):
-	assert mu(n) < mu0
-
-for n in xrange(all_have_it_gte, all_have_it_gte + 500):
-	assert mu(n) >= mu0
-
 def sum_up_to(nmax):
 	assert nmax % 15 == 0
 	ss = []
@@ -115,31 +107,15 @@ def sum_up_to(nmax):
 		ss.append(sum_of_this_k)
 	return ss
 
-nmax = 10 * 15
-
-# for n in xrange(1, nmax+1):
-# 	print n, nu(n)
-# 
-# print
-# 
-# print sum_up_to(nmax)
-
-ss = sum_up_to(nmax)
-
-print ss
-print sum((10**si * s) for si,s in enumerate(ss))
-print S(nmax)
-
-for n in xrange(1, 10 * 15 + 1):
-	print '{n:>10d}   {nun:>100d}'.format(n = n, nun = nu(n))
-	if n % 15 == 0:
-		print
-
+# for n in xrange(1, 10 * 15 + 1):
+# 	print '{n:>10d}   {nun:>100d}'.format(n = n, nun = nu(n))
+# 	if n % 15 == 0:
+# 		print
 
 M = 4232097
 m = 260517
 
-b = 5
+b = 2 ** 5
 
 def Sb(b):
 	s = 0
@@ -161,4 +137,19 @@ def Sb2(b):
 print Sb(b)
 print Sb2(b)
 print S(b*15)
+
+@pmemoize.MemoizedFunction
+def Sb3(N):
+	""" Powers of 2. """
+	print N
+	if N == 1:
+		return Sb(1)
+	HN = N/2
+	A  = Sb3(HN)
+	low = A
+	high = A * 10**(6 * HN) + M * HN
+	result = (low + high)
+	return result
+
+print Sb3(b)
 
