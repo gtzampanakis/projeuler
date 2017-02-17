@@ -29,11 +29,9 @@ def nu(n):
 		digits.append(digit)
 		if len(digits) == mikos:
 			break
-	return list(reversed(digits))
-
-def nuint(n):
+	assert sum(digits) == n
 	return sum(
-			d*10**e for d,e in zip(nu(n), count())
+			d*10**e for d,e in zip(reversed(digits), count())
 	)
 
 Scache = {
@@ -64,7 +62,7 @@ def ns_categorized(mu0):
 lds = []
 for n in xrange(99 * 15 + 1, 100 * 15 + 1):
 	# print n, str(nu(n))[-6:], str(nu(n))[-12:-6]
-	lds.append(str(nuint(n))[-6:])
+	lds.append(str(nu(n))[-6:])
 
 slds = []
 for i in reversed(xrange(6)):
@@ -98,7 +96,7 @@ def sum_up_to(nmax):
 			if mu(n) >= k:
 				while mu(n-15) >= k:
 					n = n - 15
-				sum_of_this_k += int((nu(n))[-k])
+				sum_of_this_k += int(str(nu(n))[-k])
 		if sum_of_this_k == 0:
 			break
 		ss.append(sum_of_this_k)
