@@ -115,7 +115,7 @@ for n in xrange(1, 6 * 15 + 1):
 M = 4232097
 m = 260517
 
-b = 2 ** 10
+b = 2 ** 46
 
 def Sb(b):
 	s = 0
@@ -134,18 +134,24 @@ def Sb2(b):
 		M * sum(10**(6*(i-1)) for i in xrange(1, b))
 	)
 
-r1 = Sb(b) % MOD
-r2 = Sb2(b) % MOD
-assert r1 == r2
+# r1 = Sb(b) % MOD
+# r2 = Sb2(b) % MOD
+# assert r1 == r2
 
 @pmemoize.MemoizedFunction
 def fastmod(exp):
-	if exp < 10:
-		result = 10**exp%MOD
+	# if exp < 10:
+	# 	result = 10**exp%MOD
+	# else:
+	# 	result = 10**10%MOD
+	# 	for _ in xrange(10, exp):
+	# 		result = (10*result) % MOD
+	# return result
+	if exp == 6:
+		result = 10**6%MOD
 	else:
-		result = 10**10%MOD
-		for _ in xrange(10, exp):
-			result = (10*result) % MOD
+		assert exp % 6 == 0
+		result = fastmod(exp/2)**2 % MOD
 	return result
 
 @pmemoize.MemoizedFunction
@@ -173,7 +179,8 @@ def Sb3(N):
 
 r3 = Sb3(b) % MOD
 
-assert r2 == r3
+# assert r2 == r3
 
 print r3 % MOD
+
 
