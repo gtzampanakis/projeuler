@@ -17,22 +17,32 @@ def mu(n):
 
 def c(i):
 	assert 0 <= i <= 5
-	for ni, n in enumerate(cycle([1,2,3,4,3,2])):
+	for ni, n in enumerate(cycle(['1','2','3','4','3','2'])):
 		if ni >= i:
 			yield n
 
+nucache = {
+}
+
 def nu(n):
+	if n in nucache:
+		return nucache[n]
 	it = c(a(n))
 	mikos = mu(n)
 	digits = []
-	for digit in it:
-		digits.append(digit)
-		if len(digits) == mikos:
-			break
-	assert sum(digits) == n
-	return sum(
-			d*10**e for d,e in zip(reversed(digits), count())
-	)
+	def loop():
+		for digit in it:
+			digits.append(digit)
+			if len(digits) == mikos:
+				break
+	loop()
+	# assert sum(digits) == n
+	result = int(''.join((d) for d in (digits)))
+	nucache[n] = result
+	return result
+	# return sum(
+	# 		d*10**e for d,e in zip(reversed(digits), count())
+	# )
 
 Scache = {
 		1: 1
@@ -102,7 +112,7 @@ def sum_up_to(nmax):
 		ss.append(sum_of_this_k)
 	return ss
 
-nmax = 66 * 15
+nmax = 200 * 15
 
 # for n in xrange(1, nmax+1):
 # 	print n, nu(n)
