@@ -126,20 +126,20 @@ nmax = 10 * 15
 
 ss = sum_up_to(nmax)
 
-# print ss
-# print sum((10**si * s) for si,s in enumerate(ss))
-# print S(nmax)
-# 
-# for n in xrange(1, 4 * 15 + 1):
-# 	print '{n:>10d}   {nun:>30d}'.format(n = n, nun = nu(n))
-# 	if n % 15 == 0:
-# 		print
+print ss
+print sum((10**si * s) for si,s in enumerate(ss))
+print S(nmax)
+
+for n in xrange(1, 10 * 15 + 1):
+	print '{n:>10d}   {nun:>100d}'.format(n = n, nun = nu(n))
+	if n % 15 == 0:
+		print
 
 
 M = 4232097
 m = 260517
 
-b = 200
+b = 5
 
 def Sb(b):
 	s = 0
