@@ -139,12 +139,26 @@ ss = sum_up_to(nmax)
 M = 4232097
 m = 260517
 
-b = 66
+b = 200
 
-s = 0
-for i in xrange(1, b+1):
-	s += ( M * (b-i) + m ) * 10**((i-1)*6)
+def Sb(b):
+	s = 0
+	for i in xrange(1, b+1):
+		s += ( M * (b-i) + m ) * 10**((i-1)*6)
+	return s
 
-print s
+def Sb2(b):
+	assert b >= 1
+	if b == 1:
+		return Sb(b)
+	assert b >= 2
+	return (
+		Sb(b-1) +
+		m * 10**(6*(b-1)) +
+		M * sum(10**(6*(i-1)) for i in xrange(1, b))
+	)
+
+print Sb(b)
+print Sb2(b)
 print S(b*15)
 
