@@ -1,4 +1,4 @@
-import sys
+import sys, math
 import pmemoize
 
 from itertools import *
@@ -7,6 +7,9 @@ phi = [0,1,2,3,4,0,3,5,3,0,4,3,2,1,0]
 psi = [1,1,1,1,2,3,2,4,3,4,5,5,5,5,6]
 
 MOD = 123454321
+
+def log2(x):
+	return int(math.log(x, 2))
 
 def a(n):
 	return phi[(n-1)%15]
@@ -107,15 +110,17 @@ def sum_up_to(nmax):
 		ss.append(sum_of_this_k)
 	return ss
 
-for n in xrange(1, 6 * 15 + 1):
-	print '{n:>10d}   {nun:>100d}'.format(n = n, nun = nu(n))
-	if n % 15 == 0:
-		print
+offset = 10
+for n in xrange(1 + offset, 66 * 15 + 1 + offset, 15):
+	print '{n:>10d}   {nun:>110d}'.format(n = n, nun = nu(n))
+	if 0:
+		if n % 15 == 0:
+			print
 
 M = 4232097
 m = 260517
 
-b = 2 ** 46
+b = 2 ** 6
 
 def Sb(b):
 	s = 0
@@ -134,31 +139,32 @@ def Sb2(b):
 		M * sum(10**(6*(i-1)) for i in xrange(1, b))
 	)
 
-# r1 = Sb(b) % MOD
-# r2 = Sb2(b) % MOD
-# assert r1 == r2
+r1 = Sb(b) % MOD
+r2 = Sb2(b) % MOD
+assert r1 == r2
+
+@pmemoize.MemoizedFunction
+def mod(x):
+	return x%MOD
 
 @pmemoize.MemoizedFunction
 def fastmod(exp):
-	# if exp < 10:
-	# 	result = 10**exp%MOD
-	# else:
-	# 	result = 10**10%MOD
-	# 	for _ in xrange(10, exp):
-	# 		result = (10*result) % MOD
-	# return result
-	if exp == 6:
-		result = 10**6%MOD
+	if exp == 1:
+		return 10 % MOD
 	else:
-		assert exp % 6 == 0
-		result = fastmod(exp/2)**2 % MOD
-	return result
+		l = exp/2
+		r = exp-l
+		return (fastmod(l) * fastmod(r)) % MOD
+	
 
 @pmemoize.MemoizedFunction
 def CC(N):
-	if N == 1:
+	if N == 0:
+		result = 0
+	elif N == 1:
 		result = M
 	else:
+		assert 2**log2(N) == N
 		HN = N/2
 		A = CC(HN)
 		result = (2*A)%MOD + ((2*A)%MOD * fastmod(6 * HN))
@@ -167,6 +173,7 @@ def CC(N):
 @pmemoize.MemoizedFunction
 def Sb3(N):
 	""" Powers of 2. """
+	assert 2**log2(N) == N
 	if N == 1:
 		result = Sb(1)
 	else:
@@ -179,8 +186,110 @@ def Sb3(N):
 
 r3 = Sb3(b) % MOD
 
-# assert r2 == r3
+assert r2 == r3
 
 print r3 % MOD
+print
 
+@pmemoize.MemoizedFunction
+def CC2(width):
+	if width == 0:
+		return 0
+	assert width % 6 == 0
+	if width == 6:
+		return M
+	return ((M%MOD) * ((10**(width-6)))%MOD) + ((CC2(width-6))%MOD)
+
+def strat(nu):
+	nuin = nu
+	ss = []
+	offs = []
+	bs = []
+	b = 0
+	off = 0
+	while True:
+		b = nu/15
+		if b == 0:
+			break
+		b = 2**log2(b)
+		nu -= b * 15
+		s = Sb3(b)
+		ss.append(s)
+		offs.append(off)
+		bs.append(b)
+		off += mu(b * 15)
+
+	tot = 0
+	for ssi, offi, bi in zip(ss, offs, bs):
+		print bi*15, bi, offi, ssi
+		assert offi % 6 == 0
+		tot += (
+			ssi * (10**offi) + CC2(offi)*bi
+		)
+
+	print 'remainder:', nuin - sum(bs)*15
+	return tot
+
+# print CC2(6)
+# print CC2(6)
+# print CC2(6)
+# print CC2(12)
+# print CC2(24)
+
+x = 66 * 15
+
+print strat(x) % MOD
+print S(x) % MOD
+
+@pmemoize.MemoizedFunction
+def nsix(s, n):
+	if n == 0:
+		result = 0
+	elif n == 1:
+		result = s
+	else:
+		l = n/2
+		r = n-l
+		result = (
+			mod(nsix(s,l)) * fastmod(6*r) + mod(nsix(s,r))
+		)
+	return result
+
+@pmemoize.MemoizedFunction
+def DD(rn,o):
+	if rn == 1:
+		result = 0
+	else:
+		result = 0
+		sextet = nu(15+o+1) % 10**6
+		nsextets = rn-1
+		result = nsix(sextet, nsextets)
+	return result
+
+@pmemoize.MemoizedFunction
+def BB(r, o):
+	assert 0 <= o <= 14
+	if r == 1:
+		result = nu(r+o)
+	else:
+		l = r/2
+		h = r-l
+		result = (
+				mod(BB(l,o))
+			+ 	mod(BB(h,o)) * fastmod(6*l)
+			+   mod(DD(l+1,o)) * mod(h)
+		)
+	return result
+
+print mod(BB(16,offset))
+
+t = 10**14
+
+tot = 0
+for o in xrange(0, 15):
+	rn = (t+14-o)/15
+	print o, rn, 15*(rn-1)+o+1
+	tot += mod(BB(rn, o))
+
+print mod(tot)
 
