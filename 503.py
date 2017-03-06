@@ -15,7 +15,7 @@ import pmemoize
 
 F = Fraction
 
-N = 10
+N = 50
 
 @pmemoize.MemoizedFunction
 def factorial(n):
@@ -59,7 +59,7 @@ def exp2(i, m):
 
 	if m < N:
 		s_move = F(1,m+1) * sum(
-				( exp2(ii,m+1) ) for ii in xrange(m+1)
+				exp2(ii,m+1) for ii in xrange(m+1)
 		)
 
 	if 0:
@@ -74,4 +74,4 @@ def exp2(i, m):
 		return min((F(s_stay, c_stay), s_move))
 
 res = exp2(0, 1)
-print float(res)
+print N, float(res)
