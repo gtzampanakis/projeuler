@@ -15,7 +15,7 @@ import pmemoize
 
 F = Fraction
 
-N = 200
+N = 10
 
 DO_STRATEGY= 0
 
@@ -81,7 +81,6 @@ def exp2(i, m):
 		print 's_move(%s,%s):%s' % (i,m, s_move)
 		print
 
-	exp_curr = F( (N+1) * (m-i) , m+1 )
 	exp_curr = calc_exp_curr(i,m)
 
 	if s_move is None:
