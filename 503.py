@@ -12,108 +12,56 @@ import pmemoize
 
 F = Fraction
 
-N = 4
-
-R = range(1, N+1)
-
-def mprint(*args, **kwargs):
-	if 0:
-		pprint(*args, **kwargs)
-
-def p_to_seq(p):
-	seq = []
-	for i, pi in enumerate(p):
-		seq.append(sum(1 for el in p[:i] if el > pi))
-	return tuple(seq)
-
-pairs = []
-decks = []
-infos = []
-for p in permutations(R, N):
-	decks.append(p)
-	infos.append(p_to_seq(p))
-	pairs.append((decks[-1], infos[-1]))
-
-pairs.sort(key = lambda p: p[1])
-
-if 1:
-	for pairi, pair in enumerate(pairs):
-		print pair[0], '  ', pair[1] 
-		if pairi % 4 == N-1:
-			print
-
-strategy = []
+N = 10
 
 @pmemoize.MemoizedFunction
-def exp(info):
-
-	s_move = float('inf')
-
-	assert info
-	r = len(info)
-	s_stay = 0
-	c = 0
-	cis = []
-	cds = []
-	sums = []
-	counts = []
-	for cd, ci in zip(decks, infos):
-		if ci[:r] == info:
-			cis.append(ci)
-			cds.append(cd)
-			s_stay += cd[r-1]
-			c += 1
-
-	s_prev = sum(sum(cd[:r-1]) for cd in cds)
-	s_curr = sum(cd[r-1] for cd in cds)
-	s_next = sum(sum(cd[r:]) for cd in cds)
-
-	c_prev = sum(len(cd[:r-1]) for cd in cds)
-	c_curr = sum(1 for cd in cds)
-	c_next = sum(len(cd[r:]) for cd in cds)
-
-	sums = [s_prev, s_curr, s_next]
-	counts = [c_prev, c_curr, c_next]
-	avgs = [ (su/float(co) if co else 0) for su,co in zip(sums, counts) ]
-
-	if r == N:
-		mprint(info, s_stay, 'N/A')
-
+def factorial(n):
+	if n == 0:
+		return 1
+	elif n == 1:
+		return 1
 	else:
+		return n * factorial(n-1)
+
+@pmemoize.MemoizedFunction
+def su(n):
+	return n*(n+1)/2
+
+@pmemoize.MemoizedFunction
+def exp2(i, m):
+
+	assert 0 <= i <= m-1
+	assert 1 <= m <= N
+
+	s_stay = None
+	c_stay = None
+	s_move = None
+	c_move = None
+
+	nperms = factorial(N)
+
+	tc = nperms / N * su(N)
+	x = tc / su(m)
+	s_stay = (m-i)*x
+	c_stay = nperms / m
+
+	if m < N:
 		s_move = sum(
-				exp(ci[:r+1]) for ci in cis
+				( F(1,m+1) * exp2(ii,m+1) ) for ii in xrange(m+1)
 		)
-	
-	if 1:
+		c_move = 1
 
-		side = ' '
-		if avgs[1] > avgs[2]:
-			side = '>'
-		elif avgs[1] == avgs[2]:
-			side = '='
-		elif avgs[1] < avgs[2]:
-			side = '<'
+	if 0:
+		print 's_stay(%s,%s):%s' % (i,m, s_stay)
+		print 'c_stay(%s,%s):%s' % (i,m, c_stay)
+		print 's_move(%s,%s):%s' % (i,m, s_move)
+		print 'c_move(%s,%s):%s' % (i,m, c_move)
+		print
 
-		if r == N:
-			pass
-			#strategy.append(( 'NOCH', side, ('%1.3f %1.3f %1.3f   ' % (tuple(avgs))), info ))
-		elif s_stay < s_move:
-			strategy.append(( 'STAY', side, ('%1.3f %1.3f %1.3f   ' % (tuple(avgs))), info ))
-		elif s_stay > s_move:
-			strategy.append(( 'MOVE', side, ('%1.3f %1.3f %1.3f   ' % (tuple(avgs))), info ))
-		else:
-			strategy.append(( 'NOCA', side, ('%1.3f %1.3f %1.3f   ' % (tuple(avgs))), info ))
+	if s_move is None and c_move is None:
+		return F(s_stay, c_stay)
+	else:
+		return min((F(s_stay, c_stay), F(s_move, c_move)))
 
-	return F(min((
-			s_stay, s_move
-	)), c)
-
-print
-print
-mprint()
-print exp(tuple([0]))
-
-strategy.sort(key = lambda s: len(s[3]), reverse = False)
-
-for si, s in enumerate(strategy):
-	print s[0], s[1], s[2], s[3]
+res = exp2(0, 1)
+print res, float(res)
