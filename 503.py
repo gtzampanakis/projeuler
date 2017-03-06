@@ -1,3 +1,6 @@
+import sys
+sys.setrecursionlimit(10000)
+
 from fractions import *
 from itertools import *
 from pprint import pprint
@@ -27,6 +30,17 @@ def factorial(n):
 def su(n):
 	return n*(n+1)/2
 
+# tc = nperms / N * su(N)
+tc = factorial(N+1)/2
+nperms = factorial(N)
+
+@pmemoize.MemoizedFunction
+def calc_x(m):
+	if m == 1:
+		return factorial(N+1)/2
+	else:
+		return calc_x(m-1) * (m-1) / (m+1)
+
 @pmemoize.MemoizedFunction
 def exp2(i, m):
 
@@ -36,32 +50,28 @@ def exp2(i, m):
 	s_stay = None
 	c_stay = None
 	s_move = None
-	c_move = None
 
-	nperms = factorial(N)
-
-	tc = nperms / N * su(N)
-	x = tc / su(m)
+	# x = tc / su(m)
+	# x = factorial(N+1)/(m*(m+1))
+	x = calc_x(m)
 	s_stay = (m-i)*x
 	c_stay = nperms / m
 
 	if m < N:
-		s_move = sum(
-				( F(1,m+1) * exp2(ii,m+1) ) for ii in xrange(m+1)
+		s_move = F(1,m+1) * sum(
+				( exp2(ii,m+1) ) for ii in xrange(m+1)
 		)
-		c_move = 1
 
 	if 0:
 		print 's_stay(%s,%s):%s' % (i,m, s_stay)
 		print 'c_stay(%s,%s):%s' % (i,m, c_stay)
 		print 's_move(%s,%s):%s' % (i,m, s_move)
-		print 'c_move(%s,%s):%s' % (i,m, c_move)
 		print
 
-	if s_move is None and c_move is None:
+	if s_move is None:
 		return F(s_stay, c_stay)
 	else:
-		return min((F(s_stay, c_stay), F(s_move, c_move)))
+		return min((F(s_stay, c_stay), s_move))
 
 res = exp2(0, 1)
-print res, float(res)
+print float(res)
