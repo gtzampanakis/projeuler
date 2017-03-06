@@ -4,6 +4,12 @@ from pprint import pprint
 
 import pmemoize
 
+# For the final card it is always c+i=N. This is because all cards have been
+# drawn before it so the info given uniquely identifies it.
+
+# Current card distribution depends only on current info and number of cards
+# left!
+
 F = Fraction
 
 N = 4
@@ -30,7 +36,7 @@ for p in permutations(R, N):
 
 pairs.sort(key = lambda p: p[1])
 
-if 0:
+if 1:
 	for pairi, pair in enumerate(pairs):
 		print pair[0], '  ', pair[1] 
 		if pairi % 4 == N-1:
@@ -90,6 +96,7 @@ def exp(info):
 
 		if r == N:
 			pass
+			#strategy.append(( 'NOCH', side, ('%1.3f %1.3f %1.3f   ' % (tuple(avgs))), info ))
 		elif s_stay < s_move:
 			strategy.append(( 'STAY', side, ('%1.3f %1.3f %1.3f   ' % (tuple(avgs))), info ))
 		elif s_stay > s_move:
@@ -104,11 +111,9 @@ def exp(info):
 print
 print
 mprint()
-exp(tuple([0]))
+print exp(tuple([0]))
 
 strategy.sort(key = lambda s: len(s[3]), reverse = False)
 
 for si, s in enumerate(strategy):
 	print s[0], s[1], s[2], s[3]
-	if si % 4 == N-1:
-		print
