@@ -32,9 +32,9 @@ def factorial(n):
 def su(n):
 	return n*(n+1)/2
 
-# tc = nperms / N * su(N)
-tc = factorial(N+1)/2
-nperms = factorial(N)
+# # tc = nperms / N * su(N)
+# tc = factorial(N+1)/2
+# nperms = factorial(N)
 
 @pmemoize.MemoizedFunction
 def calc_x(m):
@@ -83,6 +83,12 @@ def exp2(i, m):
 
 	exp_curr = calc_exp_curr(i,m)
 
+########################################
+	if 0 and m < N:
+		critical_i = m - calc_s_move(m) * F(m+1, N+1)
+		print 'm, critical_i', m, float(critical_i)
+########################################
+
 	if s_move is None:
 		return exp_curr
 	else:
@@ -96,16 +102,28 @@ def exp2(i, m):
 			strategy.append(s)
 		return min((exp_curr, s_move))
 
-print
-res = exp2(0, 1)
-print N, float(res)
+# print
+# res = exp2(0, 1)
+# print N, float(res)
+# 
+# print
+# 
+# if DO_STRATEGY:
+# 	strategy.sort(key = lambda s: (s[2]))
+# 	for si, s in enumerate(strategy):
+# 		print s[0], s[1], s[2]
+# 		if (si+1)%5 == 0:
+# 			print
 
-print
+E = calc_s_move(N-1)
+for m in xrange(N-1, 0, -1):
+	if m % 100 == 0:
+		print m
+	ith = int(m - E * F(m+1, N+1)) # up to this i we should move
+	a = (ith+1) * E
+	b = sum(  F((N+1) * (m-ii), m+1)   for    ii   in xrange(ith+1, m)  )
 
-if DO_STRATEGY:
-	strategy.sort(key = lambda s: (s[1],s[2]))
-	for si, s in enumerate(strategy):
-		print s[0], s[1], s[2]
-		if (si+1)%4 == 0:
-			print
+	E = F(a+b, m)
 
+print float(E)#, E == exp2(0, 1)
+	
