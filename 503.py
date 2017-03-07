@@ -15,7 +15,7 @@ import pmemoize
 
 F = Fraction
 
-N = 10
+N = 1000 * 1000
 
 DO_STRATEGY= 0
 
@@ -28,7 +28,6 @@ def factorial(n):
 	else:
 		return n * factorial(n-1)
 
-@pmemoize.MemoizedFunction
 def su(n):
 	return n*(n+1)/2
 
@@ -115,15 +114,18 @@ def exp2(i, m):
 # 		if (si+1)%5 == 0:
 # 			print
 
-E = calc_s_move(N-1)
+def suft(n0, n1):
+	return (n1*(n1+1) - n0*(n0-1))/2
+
+E = su(N) / float(N)
 for m in xrange(N-1, 0, -1):
-	if m % 100 == 0:
-		print m
-	ith = int(m - E * F(m+1, N+1)) # up to this i we should move
+	r = (m+1) / float(N+1)
+	ith = int(m - E * r) # up to this i we should move
 	a = (ith+1) * E
-	b = sum(  F((N+1) * (m-ii), m+1)   for    ii   in xrange(ith+1, m)  )
+	# b = F(N+1, m+1) * sum(  (m-ii)   for    ii   in xrange(ith+1, m)  )
+	b = ( m*(m-1-ith) - suft(ith+1, m-1) ) / r
 
-	E = F(a+b, m)
+	E = (a+b) / m
 
-print float(E)#, E == exp2(0, 1)
+print float(E)#, E - exp2(0, 1)
 	
