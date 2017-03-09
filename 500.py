@@ -1,12 +1,11 @@
 from itertools import *
+from more_itertools import *
 
 from sieve import *
 
+import pmemoize
+
 D = 500500507
-
-r = [2,2,2,3,5]
-
-N = len(r)
 
 def prod(s):
 	r = 1
@@ -23,58 +22,43 @@ def fastmod(s):
 	a,b = s[:r], s[r:]
 	return (fastmod(a) * fastmod(b))%D
 
-K = prod(r)
+r = [2,3,4]
+N = len(r)
 
-def calc_ds(n):
-	r = []
-	for x in xrange(1, n+1):
-		if n%x==0:
-			r.append(x)
-	return r
+MK = 4
 
-ds = set()
+gens = []
+for _ in xrange(MK+1):
+	gens.append(peekable(gen_primes()))
 
-for rlen in xrange(0, N+1):
-	for comb in combinations(r, rlen):
-		print comb, prod(comb)
-		ds.add(prod(comb))
+@pmemoize.MemoizedFunction
+def pow2(k):
+	return 2**k
 
-a = calc_ds(K)
-b = sorted(ds)
-diff = sorted((set(b) - set(a)) | (set(a) - set(b)))
+N = 500 * 1000 + 500
 
-print
-print K
-print a
-print b
-print len(a)
-print len(b)
-print diff
+ns = []
+for _ in xrange(N):
+	cands = []
+	raws = []
+	minv = None
+	mink = None
+	for k in xrange(MK+1):
+		p = gens[k].peek()
+		v = p**(pow2(k))
+		if minv is None or v < minv:
+			minv = v
+			mink = k
+	ns.append(minv)
+	gens[mink].next()
 
-ps = []
+print len(ns)
 
-E = 500500 * 0
+if 0:
+	ds = set()
+	for rlen in xrange(0, N+1):
+		for comb in combinations(ns, rlen):
+			ds.add(prod(comb))
+	print len(ds)
 
-# for pi, p in enumerate(gen_primes(), 1):
-# 	ps.append(p)
-# 	if pi == E:
-# 		break
-# 
-# assert len(ps) == E
-# 
-# print fastmod(ps)
-
-print fastmod([2 for _ in xrange(E-1)])
-
-def ndcomb(bes, k):
-	if k == 1:
-		print k, len(bes)
-	if k == 2:
-		print k
-
-print
-ndcomb( [
-	[2,2],
-	[3,1],
-	[5,1],
-], 1)
+print fastmod(ns)
