@@ -11,6 +11,7 @@ gen = gen_primes()
 
 ps = set()
 maxp = None
+maxreq = -1
 
 def combine(p1, p2):
 	strp1 = str(p1)
@@ -26,38 +27,38 @@ def isp(n):
 		maxp = nextp
 	return n in ps
 
-#@memoize.MemoizedFunction
-def isp2(n):
-	if n % 2 == 0:
-		return False
-	for c in xrange(3, int(n**.5)+1, 2):
-		if n % c == 0:
-			return False
-	return True
+def isp(n):
+	global maxreq
+	if n > maxreq:
+		maxreq = n
+	return is_prime(n)
 
-for p in gen_primes():
+best = -1
+for pi, p in enumerate(gen_primes(), 1):
 	if p <= 2:
 		continue
 	found_seq = False
 	for seq in seqs:
 		found = True
+		both = []
 		for seqp in seq:
 			combines = combine(p, seqp)
-			if not is_prime(combines.next()) or not is_prime(combines.next()):
+			if not isp(combines.next()) or not isp(combines.next()):
 				found = False
-				break
+				both.append(0)
+			both.append(1)
 		if found:
 			found_seq = True
 			seq.append(p)
+			if len(seq) > best:
+				best = len(seq)
 	if not found_seq:
 		seqs.append([p])
 	new_seqs = []
-	best = max(len(seq) for seq in seqs)
 	for seq in seqs:
-		if len(seq) >= best-2:
+		if len(seq) >= best-1:
 			new_seqs.append(seq)
 	seqs = new_seqs
-	if best == 5:
-		print p, best, len(seqs), seqs
-		break
+	if pi % 25 == 0:
+		print p, best, maxreq, len(seqs), seqs[:4]
 
