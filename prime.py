@@ -1,4 +1,5 @@
 import random
+from sieve import *
 
 def is_prime(n):
 	if n <= 1:
@@ -14,6 +15,17 @@ def is_prime(n):
 		i += 6
 	return True
 
+def prime_factors(n):
+	factors = []
+	for p in gen_primes():
+		while True:
+			if n%p == 0:
+				factors.append(p)
+				n /= p
+				if n == 1:
+					return factors
+			else:
+				break
  
 _mrpt_num_trials = 5 # number of bases to test
  
