@@ -1,11 +1,10 @@
+from collections import defaultdict
 from pprint import pprint
 from math import factorial
 
 def fastpow(b, e, prec):
-	if e == 0:
-		return 1%prec
-	elif e == 1:
-		return b%prec
+	if e <= 10:
+		return (b**e)%prec
 	ek = int(e**.5)
 	r = e - ek**2
 	assert r >= 0
@@ -19,9 +18,15 @@ def rfact(n, prec):
 	return r
 
 def slowfactnz1(n, prec):
+	# print 'Starting slowfactnz1 with n,prec:', n, prec
+
+	if n == 0:
+		return 1
+
 	ni = 1
 	r = 1
 	n5removed = 0
+
 
 	while 1:
 		nw = ni
@@ -63,6 +68,9 @@ def slowfactnz2(n, prec):
 	return f % 10**prec
 
 def fastfactnz(n, prec):
+
+# assume n=25834
+
 	tenprec = 10**prec
 	if n <= tenprec:
 		return slowfactnz1(n, prec)
@@ -71,8 +79,6 @@ def fastfactnz(n, prec):
 	for s in xrange(0, tenprec):
 		ocs[s] = 0
 	
-	pprint(ocs)
-
 # part with 00 in the end
 	maxn00 = n / tenprec - 1 # if n=258xx this will give 257
 	for s in ocs:
@@ -81,19 +87,73 @@ def fastfactnz(n, prec):
 		elif s == 0:
 			ocs[s] = maxn00
 	
+# we have accounted for 1 ... 25799
+
+	rest = n - (maxn00+1)*tenprec
+
+# "rest" is equal to 25834 - 25800 = 34
+
+	for s in xrange(0, rest+1):
+		ocs[s] += 1
+
+# we have accounted for 1 ... 25834
+
+	#pprint(ocs)
+
+	n5s = n/5
+
+	print n5s
+
+	to_add = defaultdict(int)
+	nmoved = 0
+	for s in ocs:
+		if s%10 in (2,6):
+			noc = ocs[s]
+			if noc:
+				if nmoved+noc > n5s:
+					noc = n5s-nmoved
+				to_add[s/2] += noc/2
+				to_add[s/2 + tenprec/2] += noc-noc/2
+				to_add[s] -= noc
+				nmoved += noc
+	
+	for s,a in to_add.iteritems():
+		ocs[s] += a
+
+	#pprint(ocs)
+
 	r = 1
 
-	ni = (maxn00+1) * tenprec
-	while ni <= n:
-		r = r*ni
-		r = removez(r)
-		r %= tenprec
-		ni += 1
+	# for s, noc in ocs.iteritems():
+	# 	if s%10 not in (0,5):
+	# 		r = r * fastpow(s, noc, tenprec)
+	# 		r %= tenprec
+
+	ocs = dict( (s,noc) for s,noc in ocs.iteritems() if s%10 not in (0,5) )
+
+	while sum(ocs.values()):
+		ocs = dict( (s,noc) for s,noc in ocs.iteritems() if noc )
+		min_ = float('inf')
+		for s,noc in ocs.iteritems():
+			if noc < min_:
+				min_ = noc
+		ra = 1
+		for s in ocs:
+			ra = (ra * s) % tenprec
+			ocs[s] -= min_
+			assert ocs[s] >= 0
+		ra = fastpow(ra, min_, tenprec)
+		r = (r * ra) % tenprec
+
+	r *= fastfactnz(n5s, prec)
 
 	return r % tenprec
+
 	
 for n in xrange(1, 500, 3):
 	assert slowfactnz1(n, 5) == slowfactnz2(n, 5)
 
-print fastfactnz(25834, 2)
+assert fastfactnz(10**7, 4) == 4688
+
+assert fastfactnz(10**12, 5) == 16576
 
