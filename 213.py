@@ -1,45 +1,76 @@
-import itertools, random
 import scipy as s
-import scipy.ndimage as sn
 
 M = 30
-BELLS = 50
-MOVEMENTS = [1, 2, 3, 4]
+N = 30
+B = 50
 
+R1 = s.array(( 0,+1))
+R2 = s.array(( 0,-1))
+R3 = s.array((+1, 0))
+R4 = s.array((-1, 0))
 
+def is_in(point):
+    if 0 <= point[0] < M:
+        if 0 <= point[1] < N:
+            return True
+    return False
 
-sum_of_empty = 0
-rm = range(M)
+def ij2k((i,j)):
+    return i*M + j
 
-psi = s.zeros((M, M))
-for mc_round in itertools.count():
-	positions = [list(p) for p in itertools.product(rm, repeat = 2)]
-	for bell in range(BELLS):
-		for position in positions:
-			direction = random.sample(MOVEMENTS, 1)[0]
-			if direction == 1:
-				position[0] += 1
-			elif direction == 2:
-				position[0] -= 1
-			elif direction == 3:
-				position[1] += 1
-			elif direction == 4:
-				position[1] -= 1
-			if position[0] == -1:
-				position[0] = 1
-			if position[0] == M:
-				position[0] = M - 2
-			if position[1] == -1:
-				position[1] = 1
-			if position[1] == M:
-				position[1] = M - 2
-	psi[:,:] = 0
-	for position in positions:
-		psi[position[0], position[1]] += 1
-	sum_of_empty += (psi == 0).sum()
-	if mc_round % 5 == 0:
-		print '{est:.7f}'.format(est = float(sum_of_empty) / float(mc_round + 1))
+def k2ij(k):
+    return (k/M, k%M)
 
+T = s.zeros((M*N, M*N))
+P = s.zeros((M*N, M*N))
 
+TEMP1 = s.zeros((M*N, M*N))
 
+for i in xrange(M):
+    for j in xrange(N):
+# max is 4 neighbors:
+        neighs = 0
+        ij = s.array((i,j))
+
+        c1 = ij+R1
+        c2 = ij+R2
+        c3 = ij+R3
+        c4 = ij+R4
+
+        if is_in(c1):
+            neighs += 1
+            T[ij2k(ij), ij2k(c1)] = 1
+        if is_in(c2):
+            neighs += 1
+            T[ij2k(ij), ij2k(c2)] = 1
+        if is_in(c3):
+            neighs += 1
+            T[ij2k(ij), ij2k(c3)] = 1
+        if is_in(c4):
+            neighs += 1
+            T[ij2k(ij), ij2k(c4)] = 1
+        
+        T[ij2k(ij),:] *= 1./neighs
+
+assert s.all(s.sum(T, 1) == s.ones(M*N))
+
+for k1 in xrange(M*N):
+    L = s.zeros(M*N)
+    L[k1] = 1
+    for b in xrange(B):
+        L[:] = s.sum(s.multiply(L[:, s.newaxis], T, out=TEMP1), 0)
+    P[k1,:] = L
+
+print P
+print
+P = 1-P
+print P
+
+print 
+
+D = s.product(P, 0)
+
+print D
+
+print s.sum(D)
 
