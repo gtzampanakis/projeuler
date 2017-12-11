@@ -54,12 +54,20 @@ for i in xrange(M):
 
 assert s.all(s.sum(T, 1) == s.ones(M*N))
 
-for k1 in xrange(M*N):
-    L = s.zeros(M*N)
-    L[k1] = 1
+if 0:
+    for k1 in xrange(M*N):
+        L = s.zeros(M*N)
+        L[k1] = 1
+        for b in xrange(B):
+            s.sum(s.multiply(L[:, s.newaxis], T, out=TEMP1), 0, out=L)
+        P[k1,:] = L
+
+else:
+    P = s.eye(M*N, M*N)
     for b in xrange(B):
-        L[:] = s.sum(s.multiply(L[:, s.newaxis], T, out=TEMP1), 0)
-    P[k1,:] = L
+        P = s.sum(
+            s.multiply( P[:, :, s.newaxis], T[s.newaxis, :, :] )
+        , 1)    
 
 print P
 print

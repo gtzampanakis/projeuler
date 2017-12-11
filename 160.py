@@ -104,46 +104,62 @@ def fastfactnz(n, prec):
 
 	print n5s
 
-	to_add = defaultdict(int)
-	nmoved = 0
-	for s in ocs:
-		if s%10 in (2,6):
-			noc = ocs[s]
-			if noc:
-				if nmoved+noc > n5s:
-					noc = n5s-nmoved
-				to_add[s/2] += noc/2
-				to_add[s/2 + tenprec/2] += noc-noc/2
-				to_add[s] -= noc
-				nmoved += noc
-	
-	for s,a in to_add.iteritems():
-		ocs[s] += a
+	def add_accordingly():
+		to_add = defaultdict(int)
+		nmoved = 0
+		for s in ocs:
+			if s%10 in (2,6):
+				noc = ocs[s]
+				if noc:
+					if nmoved+noc > n5s:
+						noc = n5s-nmoved
+					to_add[s/2] += noc/2
+					to_add[s/2 + tenprec/2] += noc-noc/2
+					to_add[s] -= noc
+					nmoved += noc
+		
+		for s,a in to_add.iteritems():
+			ocs[s] += a
+
+	add_accordingly()
 
 	#pprint(ocs)
 
-	r = 1
 
 	# for s, noc in ocs.iteritems():
 	# 	if s%10 not in (0,5):
 	# 		r = r * fastpow(s, noc, tenprec)
 	# 		r %= tenprec
 
-	ocs = dict( (s,noc) for s,noc in ocs.iteritems() if s%10 not in (0,5) )
+	ocs = dict( (s,noc) for s,noc in ocs.iteritems() if s%10 not in (0,5) and noc )
 
-	while sum(ocs.values()):
-		ocs = dict( (s,noc) for s,noc in ocs.iteritems() if noc )
-		min_ = float('inf')
-		for s,noc in ocs.iteritems():
-			if noc < min_:
-				min_ = noc
-		ra = 1
-		for s in ocs:
-			ra = (ra * s) % tenprec
-			ocs[s] -= min_
-			assert ocs[s] >= 0
-		ra = fastpow(ra, min_, tenprec)
-		r = (r * ra) % tenprec
+	def mult(ocs):
+		r = 1
+		while 1:
+			# ocs = dict( (s,noc) for s,noc in ocs.iteritems() if noc )
+			min_ = min(ocs.itervalues())
+			ss = set(ocs.keys())
+			# for s in bc-ss:
+			# 	b /= s
+			# bc = ss
+			bc = set()
+			b = 1
+			for s in ocs:
+				b = (b * s) % tenprec
+				bc.add(s)
+			for s in ss:
+				ocs[s] -= min_
+				assert ocs[s] >= 0
+				if ocs[s] == 0:
+					del ocs[s]
+			ra = fastpow(b, min_, tenprec)
+			r = (r * ra) % tenprec
+			if not ocs:
+				break
+
+		return r
+
+	r = mult(ocs)
 
 	r *= fastfactnz(n5s, prec)
 
