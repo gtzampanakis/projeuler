@@ -65,20 +65,11 @@ if 0:
 else:
     P = s.eye(M*N, M*N)
     for b in xrange(B):
-        P = s.sum(
-            s.multiply( P[:, :, s.newaxis], T[s.newaxis, :, :] )
-        , 1)    
+        P = s.dot(P, T)
 
-print P
-print
 P = 1-P
-print P
-
-print 
 
 D = s.product(P, 0)
-
-print D
 
 print s.sum(D)
 
