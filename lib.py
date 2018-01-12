@@ -1,3 +1,4 @@
+import sieve
 
 def large_xrange(start, end):
 	val = start
@@ -19,6 +20,12 @@ def prime_factors(n):
 			n /= p
 			if n == 1: return
 
+def prime_factors_2(n):
+        for p in sieve.gen_primes():
+		while n % p == 0:
+			yield p
+			n /= p
+			if n == 1: return
 def isprime(n):
 	if n == 2: return True
 	return all(n % i != 0 for i in large_xrange(2, n))
