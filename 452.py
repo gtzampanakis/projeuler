@@ -2,6 +2,8 @@ import lib
 import math
 import pmemoize
 
+MOD = 1234567891
+
 @pmemoize.MemoizedFunction
 def pf(n):
     return list(lib.prime_factors_2(n))
@@ -34,6 +36,14 @@ def H(m, n):
     return G(m, n) - G(m-1, n)
 
 @pmemoize.MemoizedFunction
+def fastqs(m):
+    # return sorted(set(m/i for i in xrange(1, int(m**.5)+1)))
+    s = set(m/i for i in xrange(1, int(m**.5)+1))
+    l = list(s)
+    l.sort()
+    return l
+
+@pmemoize.MemoizedFunction
 def G(m,n):
     if m <= 1:
         r = 0
@@ -42,8 +52,9 @@ def G(m,n):
         r = m-1
 
     else:
+        qs = fastqs(m)
         r = 0
-        if 1:
+        if 0:
             z, w = n/2, n-n/2
             for i in xrange(2, m+1):
                 r += ( H(i, z) ) * G(m/i, w)
@@ -54,13 +65,21 @@ def G(m,n):
             else:
                 s = m
                 q = 1
+                qsi = -1
                 while True:
                     e = m/(q+1)
                     if s != e:
-                        r += (s-e) * G(q, n-1)
+                        r += ( (s-e) * G(q, n-1) )
                         s = e
-                    if q > m/2:
-                        q = m
+                    # if q > m/2:
+                    #     q = m
+                    # else:
+                    #     q += 1
+                    if qsi == -1 and q == qs[0]:
+                        qsi = 0
+                    if qsi > -1:
+                        q = qs[qsi]
+                        qsi += 1
                     else:
                         q += 1
                     if q==m:
@@ -76,8 +95,8 @@ def F(m,n):
         r += G(m, i) * bincoeff(m, i)
     return r
 
-e = 1
-print F(10**e, 10**e) % 1234567891
+e = 3
+print F(10**e, 10**e) % MOD
 
-print sig(5892325)
+# print sig(5892325)
 
