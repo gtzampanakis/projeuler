@@ -51,6 +51,9 @@ def G(m,n):
     elif n == 1:
         r = m-1
 
+    elif m < 2**n:
+        return 0
+    
     else:
         qs = fastqs(m)
         r = 0
@@ -95,7 +98,7 @@ def F(m,n):
         r += G(m, i) * bincoeff(m, i)
     return r
 
-e = 3
+e = 5
 print F(10**e, 10**e) % MOD
 
 # print sig(5892325)
