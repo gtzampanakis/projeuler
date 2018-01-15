@@ -100,3 +100,38 @@ print F(10**e, 10**e) % MOD
 
 # print sig(5892325)
 
+@pmemoize.MemoizedFunction
+def J(m, n, a):
+    """
+    Number of ascending n-tuples with 
+    product <= m and smallest element >= a.
+    All elements have to be >= 2.
+    """
+
+    assert m >= 1
+    assert n >= 1
+    assert a >= 2
+
+    if m <= 1:
+        return 0
+
+    if a > m:
+        return 0
+
+    if a**n > m:
+        return 0
+
+    if n == 1:
+        return m - a + 1
+
+    if n > 1:
+        s = 0
+        e = int(m**(1./n))
+        for aj in xrange(a, e+1):
+            s += J(m/aj, n-1, aj)
+        return s
+
+print J(10**2, 9, 2)
+print G(10**2, 3)
+print G2(10**2, 3)
+
