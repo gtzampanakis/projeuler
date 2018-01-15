@@ -1,6 +1,7 @@
 import lib
 import math
 import pmemoize
+import sys
 
 MOD = 1234567891
 
@@ -95,46 +96,62 @@ def F(m,n):
     r = 0
     q = int(math.log(m, 2))
     for i in xrange(1, q+1):
-        r += G(m, i) * bincoeff(m, i)
+        r += G2(m, i) * bincoeff(m, i)
     return r
 
-e = 5
-print F(10**e, 10**e) % MOD
-
-# print sig(5892325)
+@pmemoize.MemoizedFunction
+def alk(a, l, k):
+    return (a+l)**k
 
 @pmemoize.MemoizedFunction
 def J(m, n, a):
     """
-    Number of ascending n-tuples with 
-    product <= m and smallest element >= a.
-    All elements have to be >= 2.
+    Number of n-tuples with product <= m and smallest element >= a.  All
+    elements have to be >= 2.
     """
 
     assert m >= 1
-    assert n >= 1
+    assert n >= 0
     assert a >= 2
 
     if m <= 1:
-        return 0
+        r = 0
 
-    if a > m:
-        return 0
+    elif a > m:
+        r = 0
 
-    if a**n > m:
-        return 0
+    elif a**n > m:
+        r = 0
 
-    if n == 1:
-        return m - a + 1
-
-    if n > 1:
+    elif n == 1:
+        r = m - a + 1
+    
+    elif n > 1:
         s = 0
-        e = int(m**(1./n))
-        for aj in xrange(a, e+1):
-            s += J(m/aj, n-1, aj)
-        return s
+        l = 0
+        while a+l <= int(m**(1./n)) + 1:
+            k = 1
+            while n>=k and m/alk(a,l,k) >= 1:
+                if n == k:
+                    if alk(a,l,k) <= m:
+                        s += 1
+                else:
+                    s += J(m/alk(a,l,k), n-k, a+l+1) * bincoeff(n, k)
+                k += 1
+            l += 1
+        r = s
+    
+    return r
 
-print J(10**2, 9, 2)
-print G(10**2, 3)
-print G2(10**2, 3)
+@pmemoize.MemoizedFunction
+def G2(m, n):
+    return J(m, n, 2)
 
+e = 6
+print F(10**e, 10**e) % MOD
+
+# for m in xrange(1, 1000):
+#     for n in xrange(1, 11):
+#         if G(m, n) != J(m, n, 2):
+#             print m, n, G(m, n), J(m, n, 2)
+# 
