@@ -1,7 +1,9 @@
 import lib
 import math
 import pmemoize
+import sieve
 import sys
+import time
 
 MOD = 1234567891
 
@@ -103,6 +105,14 @@ def F(m,n):
 def alk(a, l, k):
     return (a+l)**k
 
+primes = set()
+for p in sieve.gen_primes():
+    primes.add(p)
+    if p > 10**5:
+        break
+
+cache = { }
+
 @pmemoize.MemoizedFunction
 def J(m, n, a):
     """
@@ -113,6 +123,8 @@ def J(m, n, a):
     assert m >= 1
     assert n >= 0
     assert a >= 2
+
+    args = (m,n,a)
 
     if m <= 1:
         r = 0
@@ -126,21 +138,28 @@ def J(m, n, a):
     elif n == 1:
         r = m - a + 1
     
+    elif n > 1 and m in primes and (m-1,n,a) in cache:
+        r = J(m-1, n, a)
+
     elif n > 1:
         s = 0
         l = 0
-        while a+l <= int(m**(1./n)) + 1:
+        z = int(m**(1./n)) + 1
+        while a+l <= z:
             k = 1
-            while n>=k and m/alk(a,l,k) >= 1:
+            while n>=k and m >= alk(a,l,k):
                 if n == k:
-                    if alk(a,l,k) <= m:
-                        s += 1
+                    s += 1
                 else:
-                    s += J(m/alk(a,l,k), n-k, a+l+1) * bincoeff(n, k)
+                    recurs = J(m/alk(a,l,k), n-k, a+l+1)
+                    if recurs > 0:
+                        s += recurs * bincoeff(n, k)
                 k += 1
             l += 1
+
         r = s
     
+    cache[args] = r
     return r
 
 @pmemoize.MemoizedFunction
@@ -150,8 +169,3 @@ def G2(m, n):
 e = 6
 print F(10**e, 10**e) % MOD
 
-# for m in xrange(1, 1000):
-#     for n in xrange(1, 11):
-#         if G(m, n) != J(m, n, 2):
-#             print m, n, G(m, n), J(m, n, 2)
-# 
