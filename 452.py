@@ -20,7 +20,8 @@ def sig(n):
     distinct = set(pfs)
     for di in distinct:
         result.append(sum(1 for ca in pfs if ca == di))
-    return sorted(result)
+    result.sort()
+    return result
 
 @pmemoize.MemoizedFunction
 def bincoeff(n, k):
@@ -126,28 +127,18 @@ def J(m, n, a):
     Number of n-tuples with product <= m and smallest element >= a.  All
     elements have to be >= 2.
     """
-
     assert m >= 1
     assert n >= 0
     assert a >= 2
 
-    args = (m,n,a)
-
     if m <= 1:
         r = 0
-
     elif a > m:
         r = 0
-
     elif a**n > m:
         r = 0
-
     elif n == 1:
         r = m - a + 1
-    
-    elif n > 1 and m in primes and (m-1,n,a) in cache:
-        r = J(m-1, n, a)
-
     elif n > 1:
         s = 0
         l = 0
@@ -165,8 +156,7 @@ def J(m, n, a):
             l += 1
 
         r = s
-    
-    cache[args] = r
+
     return r
 
 @pmemoize.MemoizedFunction
@@ -239,6 +229,7 @@ def L(m, n, k):
     
     return r
 
+@pmemoize.MemoizedFunction
 def Lex(m, n, k):
     r = {}
     for mi in xrange(2, m+1):
@@ -254,9 +245,48 @@ def Lex(m, n, k):
 def G2(m, n):
     return J(m, n, 2)
 
-# e = 6
+@pmemoize.MemoizedFunction
+def sig2tuples(sig):
+    sig = sorted(sig, reverse=True)
+    m = lib.prod(a**b for a,b in zip(ps[1:], sig))
+    for n in xrange(1, sum(sig)+1):
+        print m,n, J(m, n, 2)
+
+def join_sigmaps(sigmaps):
+    r = {}
+    for sigmap in sigmaps:
+        for sig, freq in sigmap.iteritems():
+            if sig in r:
+                r[sig] += freq
+            else:
+                r[sig] = freq
+    return r
+
 # print F(10**e, 10**e) % MOD
 
-print PI(100)
-print PI(10)
-print L(10**6, 6, 0)
+# print L(10**6, 3, 0)
+
+@pmemoize.MemoizedFunction
+def do(m):
+    # The maximum number of distinct primes is
+    maxn = int(math.log(m, 2))
+    sigmaps = []
+    for n in xrange(1, maxn+1):
+        sigmap = L(m, n, 0)
+        sigmaps.append(sigmap)
+    sigmap = join_sigmaps(sigmaps)
+
+    print len(sigmap)
+
+    s = 0
+    for sig, freq in sigmap.iteritems():
+# Find the smallest number that has this sig
+        mmin = lib.prod(a**b for a,b in zip(ps[1:], reversed(sig)))
+        maxn = int(math.log(mmin, 2))
+        for n in xrange(1, maxn+1):
+            s += (J(mmin, n, 2) - J(mmin-1, n, 2)) * bincoeff(m, n) * freq
+
+    return s % MOD
+    
+e = 6
+print do(10**e)
