@@ -1,3 +1,4 @@
+import pmemoize
 import sieve
 
 def large_xrange(start, end):
@@ -181,3 +182,23 @@ def pandigitals(n, descending = False):
 	else:
 		r = range(n, 0, -1)
 	return (int(''.join(str(d) for d in comb)) for comb in itertools.permutations(r, n))
+
+@pmemoize.MemoizedFunction
+def bincoeff(n, k):
+    """ Binomial coefficient. """
+    if k == 0:
+        return 1
+    elif 2*k > n:
+        return bincoeff(n,n-k)
+    else:
+        e = n-k+1
+        for i in range(2,k+1):
+            e *= (n-k+i)
+            e /= i
+        return e
+
+@pmemoize.MemoizedFunction
+def compsum(m, n):
+    """ Count of n-tuples of positive integers (order is important) with sum
+    equal to m. """
+    return bincoeff(m-1, n-1)
