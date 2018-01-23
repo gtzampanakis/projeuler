@@ -183,6 +183,17 @@ def PI(m):
         return PI(sq) + PHI(m, PI(sq)) - 1
 
 @pmemoize.MemoizedFunction
+def root(m, n):
+    if n == 1:
+        return m
+    r = int(m**(1./n))
+    while 1:
+        if r**n > m:
+            return r-1
+        r += 1
+    return r
+
+@pmemoize.MemoizedFunction
 def L(m, n, k):
     """
     Signature map of numbers <= m and >= 2 whose integer factorization has
@@ -196,7 +207,8 @@ def L(m, n, k):
     elif n == 1:
         e = 1
         while 1:
-            thr = int(m**(1./e))
+            #thr = int(m**(1./e))
+            thr = root(m, e)
             if k == 0:
                 recurs = PI(thr)
             else:
@@ -230,7 +242,7 @@ def L(m, n, k):
     return r
 
 @pmemoize.MemoizedFunction
-def Lex(m, n, k):
+def Lex(m, n):
     r = {}
     for mi in xrange(2, m+1):
         sigi = tuple(sig(mi))
@@ -267,6 +279,43 @@ def join_sigmaps(sigmaps):
 # print L(10**6, 3, 0)
 
 @pmemoize.MemoizedFunction
+def compsum(m, n):
+    return lib.bincoeff(m-1, n-1)
+
+@pmemoize.MemoizedFunction
+def sig2howmany(sig, n):
+    """
+    How many n-tuples exist that have the given sig and have the same product?
+    """
+    lensig = len(sig)
+    sumsig = sum(sig)
+
+    if lensig >= 1:
+        sh = sig[0]
+        st = sig[1:]
+
+    if sumsig < n:
+        r = 0
+
+    elif lensig == 1 and n == 0:
+        r = 0
+
+    elif lensig == 1 and n >= 1:
+        r = compsum(sh, n)
+
+    elif lensig > 1:
+        r = 0
+        for gaps in xrange(0, min([sh,n])+1):
+            for complength in xrange(max([1, gaps]), min([sh,n])+1):
+                toadd = sig2howmany(st, n-gaps) * lib.bincoeff(n, n-gaps) * compsum(sh, complength) * lib.bincoeff(n-gaps, complength-gaps)
+                # tup = (sig2howmany(st, n-gaps) , lib.bincoeff(n, n-gaps) , compsum(sh, complength) , lib.bincoeff(n-gaps, complength-gaps))
+                # print 'gaps, complength, tup, toadd', gaps, complength, tup, toadd
+                r += toadd
+    
+    return r
+
+
+@pmemoize.MemoizedFunction
 def do(m):
     # The maximum number of distinct primes is
     maxn = int(math.log(m, 2))
@@ -276,17 +325,41 @@ def do(m):
         sigmaps.append(sigmap)
     sigmap = join_sigmaps(sigmaps)
 
-    print len(sigmap)
-
     s = 0
     for sig, freq in sigmap.iteritems():
-# Find the smallest number that has this sig
-        mmin = lib.prod(a**b for a,b in zip(ps[1:], reversed(sig)))
-        maxn = int(math.log(mmin, 2))
-        for n in xrange(1, maxn+1):
-            s += (J(mmin, n, 2) - J(mmin-1, n, 2)) * bincoeff(m, n) * freq
+        for n in xrange(1, sum(sig)+1):
+            s += sig2howmany(sig, n) * freq * lib.bincoeff(m, n)
 
     return s % MOD
-    
-e = 6
-print do(10**e)
+
+# print sig2howmany((1,), 0)
+# print sig2howmany((1,1), 1)
+
+# print sig2howmany(
+#         (2,3,1,1,1),
+#         3
+# )
+# print J(2**2*3**3*5*7*11, 3, 2) - J(2**2*3**3*5*7*11-1, 3, 2)
+
+for e in xrange(1, 8):
+    print e, do(10**e)
+
+# for i in xrange(2, 10**3):
+#     s = tuple(sorted(sig(i)))
+#     for n in xrange(1, sum(s)+1):
+#         quick = sig2howmany(s, n)
+#         exact = J(i, n, 2) - J(i-1, n, 2)
+#         if quick != exact:
+#             print i, quick, exact
+
+# for i in xrange(2, 10**3):
+#     s = tuple(sorted(sig(i)))
+#     for n in xrange(1, sum(s)+1):
+#         quick = L(i, n, 0)
+#         exact = Lex(i, n)
+#         if quick != exact:
+#             for k in quick:
+#                 qv = quick[k]
+#                 ev = exact[k]
+#                 if qv != ev:
+#                     print i, k, qv, ev
