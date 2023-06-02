@@ -103,3 +103,23 @@ def is_probable_prime(n):
 			return False
  
 	return True # no base tested showed n as composite
+
+PRIMES = [2, 3]
+def prime(i):
+    if i < len(PRIMES):
+        return PRIMES[i]
+    c = PRIMES[-1] + 2
+    while 1:
+        found_divisor = False
+        stop_point = c**.5
+        for p in PRIMES:
+            if p > stop_point:
+                break
+            if c % p == 0:
+                found_divisor = True
+                break
+        if not found_divisor:
+            PRIMES.append(c)
+            return c
+        else:
+            c += 2

@@ -24,7 +24,7 @@
 1
 """
 
-import logging, os, cPickle
+import logging, os, pickle
 from collections import deque
 
 LOGGER = logging.getLogger(__name__)
@@ -57,7 +57,7 @@ class MemoizedFunction:
 							'for function %s, from path %s ...', 
 							self.function, path)
 				with open(path, 'rb') as cache_file:
-					self.cache = cPickle.load(cache_file)
+					self.cache = pickle.load(cache_file)
 		return self
 	
 	def __exit__(self, exc_type, exc_value, traceback):
@@ -70,7 +70,7 @@ class MemoizedFunction:
 						'cache for function %s to path %s ...', 
 						self.function, path)
 			with open(path, 'wb') as cache_file:
-				cPickle.dump(self.cache, cache_file, cPickle.HIGHEST_PROTOCOL)
+				pickle.dump(self.cache, cache_file, pickle.HIGHEST_PROTOCOL)
 
 	def __call__(self, *args, **kwargs):
 		if self.record_stats:
